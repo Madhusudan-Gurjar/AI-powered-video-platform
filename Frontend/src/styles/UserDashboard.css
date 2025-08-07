@@ -1,0 +1,123 @@
+/* Dark classroom background */
+.user-dashboard-container {
+  background: url('userdashboard bckimg.png') no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Content area */
+.overlay {
+  position: relative;
+  padding: 50px 30px;
+  max-width: 1200px;
+  margin: auto;
+  color: #fff;
+  animation: fadeIn 1.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Title */
+.dashboard-title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 30px;
+  background: linear-gradient(to right, #6dd5ed, #2193b0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: titlePop 2s ease;
+}
+
+@keyframes titlePop {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Logout button */
+.logout-button {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 25px;
+}
+
+.logout-button .btn {
+  font-size: 1.1rem;
+  padding: 10px 20px;
+  background: #ff4e50;
+  border: none;
+  border-radius: 30px;
+  transition: all 0.3s ease-in-out;
+}
+
+.logout-button .btn:hover {
+  transform: scale(1.05);
+  background: #ff6e7f;
+}
+
+/* Video Grid */
+.videos-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+/* Video Card */
+.video-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(10px);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.video-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Video player */
+.video-card video {
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+/* Video Info */
+.video-info {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.video-info strong {
+  font-size: 1.2rem;
+  display: block;
+  color: #a3e4f7;
+}
+
+.video-info small {
+  font-size: 0.85rem;
+  color: #ccc;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-title {
+    font-size: 2rem;
+  }
+
+  .overlay {
+    padding: 30px 20px;
+  }
+}

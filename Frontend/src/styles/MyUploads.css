@@ -1,0 +1,78 @@
+.my-uploads-page {
+    min-height: 100vh;
+    background: linear-gradient(to right, #141e30, #243b55);
+    padding: 2rem;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .uploads-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .videos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .video-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  }
+  
+  .video-card video {
+    width: 100%;
+    border-radius: 8px;
+  }
+  .my-uploads-page {
+  padding: 2rem;
+  text-align: center;
+}
+
+.uploads-title {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.videos-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.video-card {
+  width: 320px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.video-title {
+  color: #141e30;
+  margin-top: 0.5rem;
+  font-weight: bold;
+  font-size: 1rem;
+}
+.delete-button {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.delete-button:hover {
+  background-color: #d9363e;
+}
+
+
+  

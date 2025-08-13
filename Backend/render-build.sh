@@ -1,4 +1,7 @@
-# !/bin/bash
-# Install ffmpeg
-apt-get update
-apt-get install -y ffmpeg
+#!/usr/bin/env bash
+
+# Install dependencies
+npm install
+
+# Start the backend
+npm run start

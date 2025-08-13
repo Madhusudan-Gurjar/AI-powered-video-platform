@@ -42,7 +42,7 @@ const AdminDashboard = () => {
       alert("Upload successful!");
 
       // Save to backend
-      const saveResponse = await fetch("http://localhost:5000/api/videos", {
+      const saveResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/videos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

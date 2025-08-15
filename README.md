@@ -73,4 +73,17 @@ npm start
 3. `transcribe.py` sends audio to AssemblyAI.
 4. Transcript and translation are stored and served to the frontend.
 
+##Future Enhancements
+
+- Implement text-to-speech functionality to generate videos in any selected language.
+
+- Support storage and playback for both raw uploaded videos and converted language videos.
+
+- Add role-based authentication for students/users, teachers, and admins.
+
+- Enhance UI for improved navigation and user experience.
+
+- Enable processing of long-duration videos for transcription, translation, and conversion.
+
+- Optimize backend performance and scalability for handling large video files efficiently.
 

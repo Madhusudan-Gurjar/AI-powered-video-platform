@@ -1,3 +1,37 @@
+// import express from "express";
+// import mongoose from "mongoose";
+// import cors from "cors";
+// import videoRoutes from "./routes/videoRoutes.js";
+// import dotenv from "dotenv";
+
+// dotenv.config(); // Load environment variables from .env file
+
+// const app = express();
+// const PORT = process.env.PORT || 5000;
+
+// // Middleware
+// app.use(cors());
+// app.use(express.json());
+
+// // MongoDB connection
+// mongoose.connect(process.env.MONGO_URI, {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// }).then(() => {
+//   console.log("✅ MongoDB connected");
+// }).catch((err) => {
+//   console.error("❌ MongoDB connection error:", err);
+// });
+
+// // Routes
+// app.use("/api/videos", videoRoutes);
+
+// // Start server
+// app.listen(PORT, () => {
+//   console.log(`🚀 Server is running on port ${PORT}`);
+// });
+
+// changes for deploy
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -9,31 +43,32 @@ dotenv.config(); // Load environment variables from .env file
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-// app.use(cors());
-// ✅ Allow only your Netlify frontend
+// -----------------------------
+// ✅ CORS Middleware
+// -----------------------------
+const allowedOrigin = "https://ai-powered-video-platform.netlify.app";
+
 app.use(cors({
-  origin: "https://ai-powered-video-platform.netlify.app",
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: allowedOrigin,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true
 }));
+
 // Handle preflight requests explicitly
 app.options("*", cors({
-  origin: "https://ai-powered-video-platform.netlify.app",
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: allowedOrigin,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true
 }));
 
-// Extra fallback headers (in case Render ignores CORS config)
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://ai-powered-video-platform.netlify.app");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
-});
+// -----------------------------
+// ✅ Body parser
+// -----------------------------
 app.use(express.json());
 
-// MongoDB connection
+// -----------------------------
+// ✅ MongoDB connection
+// -----------------------------
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -41,12 +76,18 @@ mongoose.connect(process.env.MONGO_URI, {
   console.log("✅ MongoDB connected");
 }).catch((err) => {
   console.error("❌ MongoDB connection error:", err);
+  process.exit(1); // Exit if DB connection fails
 });
 
-// Routes
+// -----------------------------
+// ✅ Routes
+// -----------------------------
 app.use("/api/videos", videoRoutes);
 
-// Start server
+// -----------------------------
+// ✅ Start server
+// -----------------------------
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
+

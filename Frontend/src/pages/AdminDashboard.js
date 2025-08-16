@@ -28,9 +28,9 @@ const AdminDashboard = () => {
     formData.append("upload_preset", "my_unsigned_preset"); // Replace with your preset
 
     setUploading(true);
-
+//"https://api.cloudinary.com/v1_1/dnm9w3upk/video/upload"
     try {
-      const response = await fetch("https://api.cloudinary.com/v1_1/dnm9w3upk/video/upload", {
+      const response = await fetch("https://api.cloudinary.com/v1_1/madhusudangurjar99/AI-Video-Platform/admin", {
         method: "POST",
         body: formData,
       });

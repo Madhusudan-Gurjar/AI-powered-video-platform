@@ -1,7 +1,8 @@
 
 
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 import "../styles/Auth.css";
 import { FaUserGraduate, FaChalkboardTeacher } from "react-icons/fa";
 import { GiBookshelf, GiPencil } from "react-icons/gi";
@@ -9,40 +10,51 @@ import { GiBookshelf, GiPencil } from "react-icons/gi";
 const Signup = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const role = new URLSearchParams(location.search).get("role") || "user";
+  const { register, loading } = useContext(AuthContext);
+  const roleParam = new URLSearchParams(location.search).get("role") || "Student";
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
+    role: roleParam,
   });
+
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Signup Data:", formData);
-    navigate(`/login?role=${role}`);
+    setError("");
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    try {
+      await register(formData.name, formData.email, formData.password, formData.role);
+      navigate("/user");
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
     <div className="signup-container">
       <div className="overlay"></div>
 
-      {/* Floating Animation Icons */}
-      {/* <div className="animation-icons">
-        <GiBookshelf className="floating-icon book-icon" />
-        <GiPencil className="floating-icon pencil-icon" />
-      </div> */}
-
       <div className="signup-card">
         <h2 className="signup-title">
-          {role === "admin" ? <FaChalkboardTeacher /> : <FaUserGraduate />}{" "}
-          {role === "admin" ? "Admin Signup" : "User Signup"}
+          {formData.role === "Admin" ? <FaChalkboardTeacher /> : <FaUserGraduate />}{" "}
+          {formData.role === "Admin" ? "Admin Signup" : "User Signup"}
         </h2>
+
+        {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
 
         <form onSubmit={handleSubmit}>
           <input
@@ -61,6 +73,16 @@ const Signup = () => {
             onChange={handleChange}
             required
           />
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            style={{ padding: "10px", marginBottom: "10px", borderRadius: "5px" }}
+          >
+            <option value="Student">Student</option>
+            <option value="Teacher">Teacher</option>
+            <option value="Admin">Admin</option>
+          </select>
           <input
             type="password"
             name="password"
@@ -77,14 +99,14 @@ const Signup = () => {
             onChange={handleChange}
             required
           />
-          <button type="submit" className="signup-button">
-            Sign Up
+          <button type="submit" className="signup-button" disabled={loading}>
+            {loading ? "Signing Up..." : "Sign Up"}
           </button>
         </form>
 
         <p>
           Already have an account?{" "}
-          <span className="login-link" onClick={() => navigate(`/login?role=${role}`)}>
+          <span className="login-link" onClick={() => navigate("/login")}>
             Login
           </span>
         </p>

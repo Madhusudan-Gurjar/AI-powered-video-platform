@@ -43,9 +43,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import ForgotPassword from "./pages/ForgotPassword";
 import MyUploads from "./pages/MyUploads";
-
-//  NEW IMPORT for video detail page
 import VideoDetails from "./pages/VideoDetails";
+import { AuthProvider } from "./context/AuthContext";
 
 // NEW IMPORT for Sarthi Chatbot
 import GitaBot from "./pages/GitaBot";
@@ -75,6 +74,22 @@ function App() {
         </Routes>
       </div>
     </Router>
+    <AuthProvider>
+      <Router>
+        <div className="app-container">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/user" element={<UserDashboard />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/admin/my-uploads" element={<MyUploads />} />
+            <Route path="/videos/:id" element={<VideoDetails />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

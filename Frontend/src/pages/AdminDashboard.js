@@ -110,12 +110,9 @@
 // };
 
 // export default AdminDashboard;
- //
-// changes for cloudinary
-// new changes madhu
-
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/Dashboard.css";
 
@@ -124,6 +121,13 @@ const AdminDashboard = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadUrl, setUploadUrl] = useState("");
   const [videoTitle, setVideoTitle] = useState("");
+  const { user, token, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  if (!user) {
+    navigate("/login");
+    return null;
+  }
 
   const handleFileChange = (e) => {
     setVideoFile(e.target.files[0]);
@@ -135,8 +139,8 @@ const AdminDashboard = () => {
 
     const formData = new FormData();
     formData.append("file", videoFile);
-    formData.append("upload_preset", "my_unsigned_preset"); // your unsigned preset name
-    formData.append("folder", "AI-Video-Platform/admin"); // ✅ place inside your folder
+    formData.append("upload_preset", "my_unsigned_preset");
+    formData.append("folder", "AI-Video-Platform/admin");
 
     setUploading(true);
 
@@ -152,10 +156,13 @@ const AdminDashboard = () => {
       setUploadUrl(data.secure_url);
       alert("Upload successful!");
 
-      // Save to backend
+      // Save to backend with JWT token
       const saveResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/videos`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({
           url: data.secure_url,
           title: videoTitle,
@@ -165,6 +172,8 @@ const AdminDashboard = () => {
       if (!saveResponse.ok) throw new Error("Failed to save video metadata");
 
       alert("Video URL and title saved to database");
+      setVideoTitle("");
+      setVideoFile(null);
     } catch (error) {
       console.error("Upload failed:", error);
       alert(`Upload failed: ${error.message}`);
@@ -173,10 +182,15 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <div className="admin-dashboard">
       <div className="dashboard-card glass-box">
-        <h2>Welcome, Admin 👋</h2>
+        <h2>Welcome, {user?.name} 👋</h2>
         <p className="dashboard-subtitle">Manage your content efficiently</p>
         <div className="dashboard-actions">
           <label className="dashboard-btn btn-blue file-input-label">
@@ -204,9 +218,9 @@ const AdminDashboard = () => {
             <i className="bi bi-collection-play"></i> My Uploads
           </Link>
 
-          <Link to="/" className="dashboard-btn btn-red">
+          <button onClick={handleLogout} className="dashboard-btn btn-red">
             <i className="bi bi-box-arrow-right"></i> Logout
-          </Link>
+          </button>
         </div>
 
         {uploadUrl && (

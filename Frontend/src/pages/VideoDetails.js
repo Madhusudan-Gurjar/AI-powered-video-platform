@@ -28,6 +28,17 @@ const languageCodeMap = {
   Kannada: "kn",
 };
 
+const formatCommentDate = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("en-IN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+};
+
 const VideoDetails = () => {
   const { id } = useParams();
   const location = useLocation();
@@ -224,9 +235,15 @@ const VideoDetails = () => {
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
           >
-            <option value="Kannada">Kannada</option>
-            <option value="Hindi">Hindi</option>
-            <option value="English">English</option>
+            {["Kannada", "Hindi", "English"].map((lang) => (
+              <option
+                key={lang}
+                value={lang}
+                style={{ backgroundColor: "#2b2b2b", color: "#f3f4f6" }}
+              >
+                {lang}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -303,9 +320,13 @@ const VideoDetails = () => {
           <ul className="list-group mt-3">
             {(video.comments || []).map((c, i) => (
               <li key={i} className="list-group-item">
-                <strong>{c.userName || "Anonymous"}</strong>: {c.text}
-                <small className="text-muted d-block">
-                  {new Date(c.createdAt).toLocaleString()}
+                <div className="vl-comment-topline">
+                  <strong className="vl-comment-author">{c.userName || "Anonymous"}</strong>
+                  <span className="vl-comment-badge">Comment</span>
+                </div>
+                <p className="vl-comment-copy">{c.text}</p>
+                <small className="vl-comment-time">
+                  {formatCommentDate(c.createdAt)}
                 </small>
               </li>
             ))}

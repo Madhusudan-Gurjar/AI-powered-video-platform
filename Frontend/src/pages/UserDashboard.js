@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useContext } from "react";
+import { useState, useEffect, useRef, useContext, useCallback } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
@@ -46,6 +46,7 @@ const UserDashboard = () => {
   const [uploading,       setUploading]       = useState(false);
   const [videoTitle,      setVideoTitle]      = useState("");
   const [videoFile,       setVideoFile]       = useState(null);
+  const [userStats,       setUserStats]       = useState(null);
   const userRole = user?.role || localStorage.getItem("vidlearn_user_role") || "Student";
   const [progress,    setProgress]    = useState(loadProgress());
   const [liked,       setLiked]       = useState(loadLiked());
@@ -53,6 +54,7 @@ const UserDashboard = () => {
     return location.state?.activeNav || localStorage.getItem("activeNav") || "Dashboard";
   });
   const [profileOpen, setProfileOpen] = useState(false);
+  const [showAllContinueWatching, setShowAllContinueWatching] = useState(false);
   const [modalOpen,   setModalOpen]   = useState(false);
   const [modalType,   setModalType]   = useState("success");
   const [modalMessage, setModalMessage] = useState("");
@@ -73,6 +75,49 @@ const UserDashboard = () => {
     };
     fetch();
   }, []);
+
+  const fetchTeacherVideos = useCallback(async () => {
+    const fetchToken = token || localStorage.getItem("token");
+    if (!fetchToken) {
+      console.warn("⚠️ No token available for fetching teacher videos");
+      setTeacherLoading(false);
+      return;
+    }
+
+    setTeacherLoading(true);
+    try {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/videos/user/uploaded`, {
+        headers: { Authorization: `Bearer ${fetchToken}` },
+      });
+      console.log("✅ Teacher videos fetched:", res.data.length);
+      setTeacherVideos(res.data);
+    } catch (err) {
+      console.error("❌ Failed to fetch teacher videos:", err);
+    } finally {
+      setTeacherLoading(false);
+    }
+  }, [token]);
+
+  /* ── fetch student stats from backend ── */
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      const fetchToken = token || localStorage.getItem("token");
+      if (!fetchToken) return;
+
+      try {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/videos/user/stats`, {
+          headers: { Authorization: `Bearer ${fetchToken}` },
+        });
+        setUserStats(res.data);
+      } catch (err) {
+        console.error("Failed to fetch user stats", err);
+      }
+    };
+
+    if (userRole === "Student") {
+      fetchUserStats();
+    }
+  }, [token, userRole]);
 
   /* ── fetch liked videos when activeNav is "Liked Videos" ── */
   useEffect(() => {
@@ -107,32 +152,19 @@ const UserDashboard = () => {
     }
   }, [activeNav, token]);
 
-  /* ── fetch teacher's videos when activeNav is "My Videos" ── */
+  /* ── fetch teacher's videos immediately for teacher accounts ── */
   useEffect(() => {
-    if (activeNav === "My Videos" && userRole === "Teacher") {
-      const fetchToken = token || localStorage.getItem("token");
-      if (!fetchToken) {
-        console.warn("⚠️ No token available for fetching teacher videos");
-        setTeacherLoading(false);
-        return;
-      }
-      
-      setTeacherLoading(true);
-      axios
-        .get(`${process.env.REACT_APP_API_URL}/api/videos/user/uploaded`, {
-          headers: { Authorization: `Bearer ${fetchToken}` },
-        })
-        .then((res) => {
-          console.log("✅ Teacher videos fetched:", res.data.length);
-          setTeacherVideos(res.data);
-          setTeacherLoading(false);
-        })
-        .catch((err) => {
-          console.error("❌ Failed to fetch teacher videos:", err);
-          setTeacherLoading(false);
-        });
+    if (userRole === "Teacher") {
+      fetchTeacherVideos();
     }
-  }, [activeNav, userRole, token]);
+  }, [userRole, fetchTeacherVideos]);
+
+  /* ── refresh teacher videos when opening My Videos ── */
+  useEffect(() => {
+    if (activeNav === "My Videos" && userRole === "Teacher" && !teacherVideos.length) {
+      fetchTeacherVideos();
+    }
+  }, [activeNav, userRole, teacherVideos.length, fetchTeacherVideos]);
 
   /* ── handle video upload ── */
   const handleUpload = async () => {
@@ -198,9 +230,17 @@ const UserDashboard = () => {
 
   /* ── derived stats ── */
   const totalWatched    = Object.keys(progress).length;
-  const totalLiked      = liked.length;
-  const totalTranscripts= videos.filter((v) => v.transcription).length;
-  const totalComments   = videos.reduce((acc, v) => acc + (v.comments?.length || 0), 0);
+  const totalLiked      = userRole === "Student" ? (userStats?.likedVideosCount ?? liked.length) : liked.length;
+  const totalComments   = userRole === "Student" ? (userStats?.commentsCount ?? 0) : videos.reduce((acc, v) => acc + (v.comments?.length || 0), 0);
+  const profileWatchedCount = userRole === "Student"
+    ? (user?.watchProgressCount ?? totalWatched)
+    : totalWatched;
+  const profileLikedCount = userRole === "Student"
+    ? (user?.likedVideosCount ?? userStats?.likedVideosCount ?? liked.length)
+    : liked.length;
+  const profileCommentsCount = userRole === "Student"
+    ? (userStats?.commentsCount ?? totalComments)
+    : totalComments;
 
   /* ── teacher-specific stats ── */
   const totalUploaded = teacherVideos.length;
@@ -214,9 +254,6 @@ const UserDashboard = () => {
     .filter((v) => progress[v._id] && progress[v._id].percent > 0 && progress[v._id].percent < 98)
     .sort((a, b) => new Date(progress[b._id]?.watchedAt) - new Date(progress[a._id]?.watchedAt))
     .slice(0, 3);
-
-  /* most-liked videos for "Your progress" bar chart */
-  const topVideos = [...videos].sort((a, b) => (b.likes || 0) - (a.likes || 0)).slice(0, 4);
 
   /* recent comments across all videos */
   const recentComments = videos
@@ -348,25 +385,19 @@ const UserDashboard = () => {
               <StatCard
                 label="Videos watched"
                 value={totalWatched}
-                sub={`${continueWatching.length} in progress`}
+                
                 accent="#4ade80"
-              />
-              <StatCard
-                label="Transcripts read"
-                value={totalTranscripts}
-                sub={`across ${videos.length} videos`}
-                accent="#60a5fa"
               />
               <StatCard
                 label="Liked videos"
                 value={totalLiked}
-                sub="saved to profile"
+                
                 accent="#facc15"
               />
               <StatCard
                 label="Comments posted"
                 value={totalComments}
-                sub={`on ${videos.filter((v) => v.comments?.length).length} videos`}
+                
                 accent="#a78bfa"
               />
             </>
@@ -463,7 +494,15 @@ const UserDashboard = () => {
           <section className="vl-section vl-continue">
             <div className="vl-section-header">
               <h2>Continue watching</h2>
-              {continueWatching.length > 1 && <Link to="#" className="vl-see-all">See all</Link>}
+              {continueWatching.length > 2 && (
+                <button
+                  type="button"
+                  className="vl-see-all vl-see-all-btn"
+                  onClick={() => setShowAllContinueWatching((prev) => !prev)}
+                >
+                  {showAllContinueWatching ? "Show less" : "See all"}
+                </button>
+              )}
             </div>
 
             {loading ? (
@@ -473,7 +512,7 @@ const UserDashboard = () => {
                 No videos in progress yet. <Link to="#" onClick={() => setActiveNav("My Videos")}>Browse videos</Link> and start watching!
               </p>
             ) : (
-              continueWatching.map((v) => (
+              (showAllContinueWatching ? continueWatching : continueWatching.slice(0, 2)).map((v) => (
                 <VideoRow
                   key={v._id}
                   video={v}
@@ -498,23 +537,6 @@ const UserDashboard = () => {
             )}
           </section>
 
-          {/* Your progress */}
-          <section className="vl-section vl-progress-panel">
-            <h2>Your progress</h2>
-            {loading ? (
-              <p className="vl-placeholder">Loading…</p>
-            ) : topVideos.length === 0 ? (
-              <p className="vl-placeholder">No videos yet.</p>
-            ) : (
-              topVideos.map((v) => (
-                <ProgressBar
-                  key={v._id}
-                  label={v.title || "Untitled"}
-                  value={progress[v._id]?.percent || 0}
-                />
-              ))
-            )}
-          </section>
         </div>
 
         {/* ── Recent comments + Available languages ── */}
@@ -544,15 +566,14 @@ const UserDashboard = () => {
             <h2>Available languages</h2>
             <div className="vl-lang-grid">
               {[
-                { name: "English", count: videos.length, color: "#f59e0b" },
-                { name: "Hindi",   count: Math.floor(videos.length * 0.6), color: "#4ade80" },
-                { name: "Kannada", count: Math.floor(videos.length * 0.4), color: "#f59e0b" },
+                { name: "English", color: "#f59e0b" },
+                { name: "Hindi", color: "#4ade80" },
+                { name: "Kannada", color: "#f59e0b" },
               ].map((lang) => (
                 <div key={lang.name} className="vl-lang-card">
-                  <span className="vl-lang-dot" style={{ background: lang.color }} />
-                  <div>
+                  <div className="vl-lang-head">
+                    <span className="vl-lang-dot" style={{ background: lang.color }} />
                     <p className="vl-lang-name">{lang.name}</p>
-                    <p className="vl-lang-count">{lang.count} videos</p>
                   </div>
                 </div>
               ))}
@@ -678,20 +699,20 @@ const UserDashboard = () => {
             )}
           </div>
         ) : (
-          <section className="vl-section" style={{ padding: "20px", marginBottom: "20px", marginLeft: "30px", marginRight: "30px" }}>
-            <h2 style={{ marginTop: 0, marginBottom: "12px", fontSize: "18px" }}>Your Liked Videos</h2>
+          <section className="vl-section" style={{ padding: "20px", marginTop: "18px", marginBottom: "20px", marginLeft: "30px", marginRight: "30px" }}>
+            <h2 style={{ marginTop: 0, marginBottom: "16px", fontSize: "18px" }}>Your Liked Videos</h2>
             {likedLoading ? (
               <p className="vl-placeholder">Loading liked videos…</p>
             ) : likedVideos.length === 0 ? (
               <p className="vl-placeholder">You haven't liked any videos yet.</p>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: "10px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(165px, 1fr))", gap: "14px" }}>
                 {likedVideos.map((v) => (
                   <div
                     key={v._id}
                     style={{
                       background: "#1e293b",
-                      borderRadius: "6px",
+                      borderRadius: "10px",
                       overflow: "hidden",
                       cursor: "pointer",
                       transition: "transform 0.2s",
@@ -700,17 +721,17 @@ const UserDashboard = () => {
                     onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
                     onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
                   >
-                    <div style={{ aspectRatio: "16/9", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px" }}>
+                    <div style={{ aspectRatio: "16/9", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "32px" }}>
                       <span style={{ fontSize: "20px" }}>▶️</span>
                     </div>
-                    <div style={{ padding: "6px" }}>
-                      <p style={{ margin: "0 0 2px 0", fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontSize: "9px" }}>
+                    <div style={{ padding: "10px" }}>
+                      <p style={{ margin: "0 0 4px 0", fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontSize: "13px" }}>
                         {v.title}
                       </p>
-                      <p style={{ margin: "0 0 2px 0", fontSize: "8px", color: "#94a3b8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      <p style={{ margin: "0 0 6px 0", fontSize: "11px", color: "#94a3b8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         By {v.uploader}
                       </p>
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "8px", color: "#94a3b8" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#94a3b8" }}>
                         <span>👍 {v.likes || 0}</span>
                         <span>💬 {v.comments?.length || 0}</span>
                       </div>
@@ -741,21 +762,21 @@ const UserDashboard = () => {
             <div className="vl-panel-info">
               <div className="vl-panel-row">
                 <span className="vl-panel-key">📧 Email</span>
-                <span className="vl-panel-val">{userEmail || "—"}</span>
+                <span className="vl-panel-val vl-panel-val--email">{userEmail || "—"}</span>
               </div>
               {userRole !== "Teacher" && (
                 <>
                   <div className="vl-panel-row">
                     <span className="vl-panel-key">🎬 Videos watched</span>
-                    <span className="vl-panel-val">{Object.keys(progress).length}</span>
+                    <span className="vl-panel-val">{profileWatchedCount}</span>
                   </div>
                   <div className="vl-panel-row">
                     <span className="vl-panel-key">❤️ Liked videos</span>
-                    <span className="vl-panel-val">{liked.length}</span>
+                    <span className="vl-panel-val">{profileLikedCount}</span>
                   </div>
                   <div className="vl-panel-row">
                     <span className="vl-panel-key">💬 Comments</span>
-                    <span className="vl-panel-val">{totalComments}</span>
+                    <span className="vl-panel-val">{profileCommentsCount}</span>
                   </div>
                 </>
               )}
@@ -855,24 +876,12 @@ const VideoRow = ({ video, progressPct, onClick }) => {
           </div>
         )}
       </div>
-      {video.transcription && (
+      {/* {video.transcription && (
         <span className="vl-lang-badge">Transcript</span>
-      )}
+      )} */}
     </div>
   );
 };
-
-const ProgressBar = ({ label, value }) => (
-  <div className="vl-prog-item">
-    <p className="vl-prog-label">{label}</p>
-    <div className="vl-prog-track">
-      <div
-        className="vl-prog-fill"
-        style={{ width: `${Math.min(value, 100)}%` }}
-      />
-    </div>
-  </div>
-);
 
 const TeacherChart = ({ teacherVideos }) => {
   if (!teacherVideos || teacherVideos.length === 0) {
@@ -880,6 +889,7 @@ const TeacherChart = ({ teacherVideos }) => {
   }
 
   const maxLikes = Math.max(...teacherVideos.map((v) => v.likes || 0), 1);
+  const axisMax = Math.max(maxLikes, 2);
   const chartWidth = 1000;
   const chartHeight = 300;
   const margin = { top: 24, right: 24, bottom: 72, left: 56 };
@@ -887,7 +897,9 @@ const TeacherChart = ({ teacherVideos }) => {
   const plotHeight = chartHeight - margin.top - 24;
   const slotWidth = plotWidth / teacherVideos.length;
   const barWidth = Math.max(26, Math.min(64, slotWidth * 0.58));
-  const yTicks = [0, Math.ceil(maxLikes / 4), Math.ceil(maxLikes / 2), Math.ceil((maxLikes * 3) / 4), maxLikes];
+  const yTicks = axisMax <= 2
+    ? [0, 1, 2]
+    : [0, Math.ceil(axisMax / 4), Math.ceil(axisMax / 2), Math.ceil((axisMax * 3) / 4), axisMax];
 
   return (
     <div style={{ width: "100%", overflowX: "auto", paddingBottom: "12px" }}>
@@ -907,7 +919,7 @@ const TeacherChart = ({ teacherVideos }) => {
 
         {/* Y-axis labels */}
         {yTicks.map((val, idx) => {
-          const y = margin.top + plotHeight - (idx * plotHeight) / 4;
+          const y = margin.top + plotHeight - (idx * plotHeight) / (yTicks.length - 1);
           return (
             <text
               key={`y-label-${idx}`}
@@ -923,13 +935,13 @@ const TeacherChart = ({ teacherVideos }) => {
         })}
 
         {/* Horizontal grid lines */}
-        {[0, 1, 2, 3, 4].map((idx) => (
+        {yTicks.map((_, idx) => (
           <line
             key={`grid-${idx}`}
             x1={margin.left}
-            y1={margin.top + plotHeight - (idx * plotHeight) / 4}
+            y1={margin.top + plotHeight - (idx * plotHeight) / (yTicks.length - 1)}
             x2={margin.left + plotWidth}
-            y2={margin.top + plotHeight - (idx * plotHeight) / 4}
+            y2={margin.top + plotHeight - (idx * plotHeight) / (yTicks.length - 1)}
             stroke="#334155"
             strokeDasharray="5,6"
             strokeWidth="1"
@@ -959,7 +971,7 @@ const TeacherChart = ({ teacherVideos }) => {
         {/* Bars */}
         {teacherVideos.map((video, idx) => {
           const likes = video.likes || 0;
-          const barHeight = (likes / maxLikes) * plotHeight;
+          const barHeight = (likes / axisMax) * plotHeight;
           const xCenter = margin.left + idx * slotWidth + slotWidth / 2;
           const x = xCenter - barWidth / 2;
           const y = margin.top + plotHeight - barHeight;

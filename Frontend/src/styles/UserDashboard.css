@@ -245,11 +245,10 @@
 /* ── Middle row: Continue watching + Progress ── */
 .vl-middle-row {
   display: grid;
-  grid-template-columns: 1fr 280px;
+  grid-template-columns: 1fr;
   gap: 1rem;
   padding: 0 2rem 1rem;
 }
-@media (max-width: 860px) { .vl-middle-row { grid-template-columns: 1fr; } }
 
 /* ── Bottom row ── */
 .vl-bottom-row {
@@ -276,6 +275,12 @@
 .vl-section h2 { font-size: 0.95rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.9rem; }
 .vl-see-all { font-size: 0.78rem; color: var(--accent3); text-decoration: none; font-weight: 500; }
 .vl-see-all:hover { text-decoration: underline; }
+.vl-see-all-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
 .vl-placeholder { font-size: 0.82rem; color: var(--text-muted); }
 .vl-placeholder a { color: var(--accent3); text-decoration: none; }
 
@@ -403,21 +408,31 @@
   background: var(--bg-deep);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 0.75rem 0.9rem;
+  padding: 0.95rem 1rem;
   display: flex;
   align-items: center;
-  gap: 10px;
   transition: background 0.18s;
   cursor: pointer;
 }
 .vl-lang-card:hover { background: var(--bg-hover); }
+.vl-lang-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
 .vl-lang-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
 }
-.vl-lang-name { font-size: 0.82rem; font-weight: 600; color: var(--text-main); }
+.vl-lang-name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+}
 .vl-lang-count { font-size: 0.7rem; color: var(--text-muted); margin-top: 1px; }
 .vl-lang-add { border-style: dashed; }
 .vl-lang-plus {
@@ -552,6 +567,12 @@
   text-align: right;
   max-width: 55%;
   word-break: break-all;
+}
+.vl-panel-val--email {
+  word-break: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Logout */

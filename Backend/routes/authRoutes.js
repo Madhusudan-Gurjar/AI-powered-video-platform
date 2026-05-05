@@ -4,6 +4,15 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
+const buildUserResponse = (user) => ({
+  id: user._id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  likedVideosCount: user.likedVideos?.length || 0,
+  watchProgressCount: user.watchProgress?.length || 0,
+});
+
 // Register
 router.post("/register", async (req, res) => {
   try {
@@ -29,7 +38,7 @@ router.post("/register", async (req, res) => {
 
     res.status(201).json({
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      user: buildUserResponse(user),
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -63,7 +72,7 @@ router.post("/login", async (req, res) => {
 
     res.json({
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      user: buildUserResponse(user),
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

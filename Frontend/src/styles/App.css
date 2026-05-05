@@ -1,8 +1,9 @@
 /* Background container */
 .app-container {
-  background: linear-gradient(135deg, #1e1e1e, #333);
+  /* background: linear-gradient(135deg, #1e1e1e, #333); */
+  
   min-height: 100vh;
-  padding: 2rem;
+  /* padding: 2rem; */
   color: #fff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }

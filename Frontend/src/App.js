@@ -36,9 +36,10 @@
 
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+// import Home from "./pages/Home";
+// import Login from "./pages/Login";
+// import Signup from "./pages/Signup";
+import AuthPage from "./pages/AuthPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -58,9 +59,10 @@ function App() {
     <Router>
       <div className="app-container">
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          <Route path="/" element={<AuthPage />} />
+          {/* <Route path="/" element={<Signup />} /> */}
+          {/* <Route path="/login" element={<Login />} /> */}
+          {/* <Route path="/signup" element={<Signup />} /> */}
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/user" element={<UserDashboard />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

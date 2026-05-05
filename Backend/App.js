@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import videoRoutes from "./routes/videoRoutes.js";
-import geetaBotRoutes from "./routes/geetaBotRoutes.js";
+import geetaBotRoutes, { handleGeetaBotChat } from "./routes/geetaBotRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import dotenv from "dotenv";
 
@@ -30,6 +30,7 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use("/api/auth", authRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/geeta-bot", geetaBotRoutes);
+app.post("/api/geeta-bot/chat", handleGeetaBotChat);
 
 // Start server
 app.listen(PORT, () => {

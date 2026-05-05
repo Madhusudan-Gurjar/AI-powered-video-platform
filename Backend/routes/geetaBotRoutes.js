@@ -31,20 +31,70 @@ Rules:
 - If it is the beginning of a conversation about a problem, set chapter and verse to null and sanskrit/translation to empty strings. Wait until later to quote.
 - Keep replies warm, human-like, and concise (1-2 short paragraphs).`;
 
-// POST /api/geeta-bot/chat
-router.post("/chat", async (req, res) => {
+const normalizeConversationHistory = (history = []) => {
+  const normalized = [];
+
+  for (const entry of history) {
+    const role =
+      entry?.role === "assistant"
+        ? "assistant"
+        : entry?.role === "user"
+          ? "user"
+          : null;
+    const content = typeof entry?.content === "string" ? entry.content.trim() : "";
+
+    if (!role || !content) {
+      continue;
+    }
+
+    if (normalized.length === 0) {
+      if (role === "assistant") {
+        continue;
+      }
+
+      normalized.push({ role, content });
+      continue;
+    }
+
+    const lastEntry = normalized[normalized.length - 1];
+    if (role === lastEntry.role) {
+      // Keep the most recent turn when the client sends duplicate roles.
+      normalized[normalized.length - 1] = { role, content };
+      continue;
+    }
+
+    normalized.push({ role, content });
+  }
+
+  return normalized;
+};
+
+export const handleGeetaBotChat = async (req, res) => {
   try {
     const { message, conversationHistory = [] } = req.body;
+    const trimmedMessage = typeof message === "string" ? message.trim() : "";
 
-    if (!message || message.trim() === "") {
+    if (!trimmedMessage) {
       return res.status(400).json({ error: "Message is required." });
+    }
+
+    const normalizedHistory = normalizeConversationHistory(conversationHistory.slice(-10));
+    const turns = [...normalizedHistory];
+    const lastTurn = turns[turns.length - 1];
+
+    if (!lastTurn) {
+      turns.push({ role: "user", content: trimmedMessage });
+    } else if (lastTurn.role === "user") {
+      // If the latest history item is already a user turn, replace it with the newest message.
+      turns[turns.length - 1] = { role: "user", content: trimmedMessage };
+    } else {
+      turns.push({ role: "user", content: trimmedMessage });
     }
 
     // Build messages array for Sarvam AI
     const messages = [
       { role: "system", content: SYSTEM_PROMPT },
-      ...conversationHistory.slice(-10), // Keep last 10 messages for context
-      { role: "user", content: message },
+      ...turns,
     ];
 
     const response = await axios.post(
@@ -143,6 +193,9 @@ router.post("/chat", async (req, res) => {
       details: error.response?.data || error.message,
     });
   }
-});
+};
+
+// POST /api/geeta-bot/chat
+router.post("/chat", handleGeetaBotChat);
 
 export default router;

@@ -35,6 +35,9 @@
 // changes madhu
 
 // src/App.jsx
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import AuthPage from "./pages/AuthPage";
+import Home from "./pages/Home";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // import Home from "./pages/Home";
 // import Login from "./pages/Login";
@@ -78,20 +81,39 @@ function App() {
     </Router>
     <AuthProvider>
       <Router>
-        <div className="app-container">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/user" element={<UserDashboard />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/admin/my-uploads" element={<MyUploads />} />
-            <Route path="/videos/:id" element={<VideoDetails />} />
-          </Routes>
-        </div>
+        <AppShell />
       </Router>
     </AuthProvider>
+  );
+}
+
+function AppShell() {
+  const location = useLocation();
+  const fullBleedPage =
+    location.pathname === "/saarthi-ai" ||
+    location.pathname === "/geeta-bot" ||
+    location.pathname.startsWith("/videos/");
+
+  return (
+    <div className={`app-container ${fullBleedPage ? "app-container--full" : ""}`}>
+      <Routes>
+        <Route path="/" element={<AuthPage />} />
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/signup" element={<AuthPage />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/user" element={<UserDashboard />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/admin/my-uploads" element={<MyUploads />} />
+
+        {/*  NEW ROUTE added for video detail view */}
+        <Route path="/videos/:id" element={<VideoDetails />} />
+
+        {/* Saarthi AI / chatbot routes */}
+        <Route path="/saarthi-ai" element={<GitaBot />} />
+        <Route path="/geeta-bot" element={<GitaBot />} />
+      </Routes>
+    </div>
   );
 }
 

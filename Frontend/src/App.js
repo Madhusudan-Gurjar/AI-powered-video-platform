@@ -47,6 +47,9 @@ import MyUploads from "./pages/MyUploads";
 //  NEW IMPORT for video detail page
 import VideoDetails from "./pages/VideoDetails";
 
+// NEW IMPORT for Sarthi Chatbot
+import GitaBot from "./pages/GitaBot";
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./styles/App.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -66,6 +69,9 @@ function App() {
 
           {/*  NEW ROUTE added for video detail view */}
           <Route path="/videos/:id" element={<VideoDetails />} />
+          
+          {/* Sarthi Chatbot Route */}
+          <Route path="/geeta-bot" element={<GitaBot />} />
         </Routes>
       </div>
     </Router>

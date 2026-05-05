@@ -21,19 +21,34 @@ const getInitials = (name = "") =>
     .join("");
 
 /* localStorage key helpers */
-const PROGRESS_KEY = "vidlearn_progress";   // { videoId: { percent, watchedAt } }
-const LIKED_KEY    = "vidlearn_liked";       // [videoId, ...]
+const PROGRESS_KEY_PREFIX = "vidlearn_progress";
+const LIKED_KEY_PREFIX    = "vidlearn_liked";
 
-const loadProgress = () => JSON.parse(localStorage.getItem(PROGRESS_KEY) || "{}");
-const loadLiked    = () => JSON.parse(localStorage.getItem(LIKED_KEY)    || "[]");
+const getStoredUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    return null;
+  }
+};
+
+const getStorageKey = (prefix, user) => {
+  const userKey = user?.id || user?._id || user?.email || getStoredUser()?.id || getStoredUser()?.email || "guest";
+  return `${prefix}:${userKey}`;
+};
+
+const loadProgress = (storageKey) => JSON.parse(localStorage.getItem(storageKey) || "{}");
+const loadLiked = (storageKey) => JSON.parse(localStorage.getItem(storageKey) || "[]");
 
 /* ─── component ───────────────────────────────────────────── */
 const UserDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, token } = useContext(AuthContext);
+  const { user, token, logout } = useContext(AuthContext);
   const userName  = user?.name || localStorage.getItem("vidlearn_user_name") || "User";
   const userEmail = user?.email || localStorage.getItem("vidlearn_user_email") || "";
+  const storageKey = getStorageKey(PROGRESS_KEY_PREFIX, user);
+  const likedStorageKey = getStorageKey(LIKED_KEY_PREFIX, user);
 
   const [videos,          setVideos]          = useState([]);
   const [likedVideos,     setLikedVideos]     = useState([]);
@@ -48,8 +63,8 @@ const UserDashboard = () => {
   const [videoFile,       setVideoFile]       = useState(null);
   const [userStats,       setUserStats]       = useState(null);
   const userRole = user?.role || localStorage.getItem("vidlearn_user_role") || "Student";
-  const [progress,    setProgress]    = useState(loadProgress());
-  const [liked,       setLiked]       = useState(loadLiked());
+  const [progress,    setProgress]    = useState(() => loadProgress(storageKey));
+  const [liked,       setLiked]       = useState(() => loadLiked(likedStorageKey));
   const [activeNav,   setActiveNav]   = useState(() => {
     return location.state?.activeNav || localStorage.getItem("activeNav") || "Dashboard";
   });
@@ -228,6 +243,11 @@ const UserDashboard = () => {
     localStorage.setItem("activeNav", activeNav);
   }, [activeNav]);
 
+  useEffect(() => {
+    setProgress(loadProgress(storageKey));
+    setLiked(loadLiked(likedStorageKey));
+  }, [storageKey, likedStorageKey]);
+
   /* ── derived stats ── */
   const totalWatched    = Object.keys(progress).length;
   const totalLiked      = userRole === "Student" ? (userStats?.likedVideosCount ?? liked.length) : liked.length;
@@ -260,14 +280,13 @@ const UserDashboard = () => {
     .flatMap((v) =>
       (v.comments || []).map((c) => ({ ...c, videoTitle: v.title, videoId: v._id }))
     )
+    .filter((c) => c.userId && c.userId.toString() === user?.id?.toString())
     .slice(-3)
     .reverse();
 
   const handleLogout = () => {
-    localStorage.removeItem("vidlearn_user_name");
-    localStorage.removeItem("vidlearn_user_email");
-    localStorage.removeItem("vidlearn_user_role");
-    navigate("/");
+    logout();
+    navigate("/", { replace: true });
   };
 
   /* Role-aware sidebar nav — no Languages / Transcripts / Settings */
@@ -284,7 +303,14 @@ const UserDashboard = () => {
         { label: "All Videos", icon: "🎥" },
         { label: "Dashboard", icon: "🏠" },
         secondMenuItem,
+        { label: "Saarthi AI", icon: "✨" },
       ];
+
+  useEffect(() => {
+    if (userRole === "Teacher" && activeNav === "Saarthi AI") {
+      setActiveNav("Dashboard");
+    }
+  }, [userRole, activeNav]);
 
 
   /* ── render ── */
@@ -305,6 +331,10 @@ const UserDashboard = () => {
               className={`vl-nav-item ${activeNav === label ? "active" : ""}`}
               onClick={() => {
                 setProfileOpen(false);
+                if (label === "Saarthi AI") {
+                  navigate("/saarthi-ai");
+                  return;
+                }
                 setActiveNav(label);
               }}
             >

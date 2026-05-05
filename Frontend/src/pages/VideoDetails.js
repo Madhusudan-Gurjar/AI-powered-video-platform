@@ -4,21 +4,34 @@ import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
 /* ── progress helpers (shared with UserDashboard) ── */
-const PROGRESS_KEY = "vidlearn_progress";
-const LIKED_KEY    = "vidlearn_liked";
+const PROGRESS_KEY_PREFIX = "vidlearn_progress";
+const LIKED_KEY_PREFIX = "vidlearn_liked";
 
-const saveProgress = (videoId, percent) => {
-  const all = JSON.parse(localStorage.getItem(PROGRESS_KEY) || "{}");
-  all[videoId] = { percent: Math.round(percent), watchedAt: new Date().toISOString() };
-  localStorage.setItem(PROGRESS_KEY, JSON.stringify(all));
+const getStoredUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    return null;
+  }
 };
 
-const toggleLiked = (videoId) => {
-  const liked = JSON.parse(localStorage.getItem(LIKED_KEY) || "[]");
+const getStorageKey = (prefix, user) => {
+  const userKey = user?.id || user?._id || user?.email || getStoredUser()?.id || getStoredUser()?.email || "guest";
+  return `${prefix}:${userKey}`;
+};
+
+const saveProgress = (storageKey, videoId, percent) => {
+  const all = JSON.parse(localStorage.getItem(storageKey) || "{}");
+  all[videoId] = { percent: Math.round(percent), watchedAt: new Date().toISOString() };
+  localStorage.setItem(storageKey, JSON.stringify(all));
+};
+
+const toggleLiked = (storageKey, videoId) => {
+  const liked = JSON.parse(localStorage.getItem(storageKey) || "[]");
   const idx = liked.indexOf(videoId);
   if (idx === -1) liked.push(videoId);
   else liked.splice(idx, 1);
-  localStorage.setItem(LIKED_KEY, JSON.stringify(liked));
+  localStorage.setItem(storageKey, JSON.stringify(liked));
   return idx === -1; // true = now liked
 };
 
@@ -45,6 +58,8 @@ const VideoDetails = () => {
   const navigate = useNavigate();
   const { token, user } = useContext(AuthContext);
   const isTeacher = user?.role === "Teacher" || localStorage.getItem("vidlearn_user_role") === "Teacher";
+  const progressStorageKey = getStorageKey(PROGRESS_KEY_PREFIX, user);
+  const likedStorageKey = getStorageKey(LIKED_KEY_PREFIX, user);
   const [video, setVideo] = useState(null);
   const [comment, setComment] = useState("");
   const [language, setLanguage] = useState("English");
@@ -60,31 +75,31 @@ const VideoDetails = () => {
 
   /* restore liked state */
   useEffect(() => {
-    const liked = JSON.parse(localStorage.getItem(LIKED_KEY) || "[]");
+    const liked = JSON.parse(localStorage.getItem(likedStorageKey) || "[]");
     setIsLiked(liked.includes(id));
-  }, [id]);
+  }, [id, likedStorageKey]);
 
   /* track playback progress */
   const handleTimeUpdate = useCallback(() => {
     const el = videoRef.current;
     if (!el || !el.duration) return;
     const pct = (el.currentTime / el.duration) * 100;
-    saveProgress(id, pct);
-  }, [id]);
+    saveProgress(progressStorageKey, id, pct);
+  }, [id, progressStorageKey]);
 
   /* mark as 100% when ended */
   const handleEnded = useCallback(() => {
-    saveProgress(id, 100);
-  }, [id]);
+    saveProgress(progressStorageKey, id, 100);
+  }, [id, progressStorageKey]);
 
   /* restore playback position */
   const handleLoadedMetadata = useCallback(() => {
-    const saved = JSON.parse(localStorage.getItem(PROGRESS_KEY) || "{}")[id];
+    const saved = JSON.parse(localStorage.getItem(progressStorageKey) || "{}")[id];
     if (saved && saved.percent > 0 && saved.percent < 98 && videoRef.current) {
       videoRef.current.currentTime =
         (saved.percent / 100) * videoRef.current.duration;
     }
-  }, [id]);
+  }, [id, progressStorageKey]);
 
   useEffect(() => {
     const fetchVideo = async () => {

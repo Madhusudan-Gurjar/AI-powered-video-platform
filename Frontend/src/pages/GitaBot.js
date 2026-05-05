@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/GitaBot.css";
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const SENTIMENT_CONFIG = {
   happy: { emoji: "😊", label: "Happy" },
   sad: { emoji: "😔", label: "Sad" },
@@ -10,7 +12,7 @@ const SENTIMENT_CONFIG = {
   confused: { emoji: "🤔", label: "Confused" },
   angry: { emoji: "😤", label: "Angry" },
   hopeful: { emoji: "🌟", label: "Hopeful" },
-  grateful: { emoji: "🙏", label: "Grateful" },
+  grateful: { emoji: "✨", label: "Grateful" },
   neutral: { emoji: "😌", label: "Neutral" },
 };
 
@@ -48,6 +50,9 @@ function GitaBot() {
   };
 
   useEffect(() => {
+    if (messages.length === 0 && !isLoading) {
+      return;
+    }
     scrollToBottom();
   }, [messages, isLoading]);
 
@@ -69,10 +74,12 @@ function GitaBot() {
   };
 
   const buildConversationHistory = () => {
-    return messages.map((msg) => ({
-      role: msg.role === "user" ? "user" : "assistant",
-      content: msg.text,
-    }));
+    return messages
+      .filter((msg) => msg.role === "user" || msg.role === "assistant")
+      .map((msg) => ({
+        role: msg.role,
+        content: msg.text,
+      }));
   };
 
   const sendMessage = async (text) => {
@@ -93,7 +100,7 @@ function GitaBot() {
 
     try {
       const conversationHistory = buildConversationHistory();
-      const response = await axios.post("http://localhost:5000/api/geeta-bot/chat", {
+      const response = await axios.post(`${API_URL}/api/geeta-bot/chat`, {
         message: messageText,
         conversationHistory,
       });
@@ -131,7 +138,7 @@ function GitaBot() {
 
       const botMessage = {
         id: Date.now() + 1,
-        role: "bot",
+        role: "assistant",
         text: cleanReply,
         time: formatTime(),
         sentiment,
@@ -176,7 +183,7 @@ function GitaBot() {
       <aside className="sarthi-sidebar">
         <div className="sidebar-header">
           <div className="sidebar-brand">
-            <div className="sidebar-brand-icon">🙏</div>
+            <div className="sidebar-brand-icon ">✨</div>
             <div className="sidebar-brand-text">
               <h1>Sarthi</h1>
               <p>Gita Wisdom Guide</p>
@@ -195,10 +202,7 @@ function GitaBot() {
             <i className="bi bi-chat-dots"></i>
             Chat with Sarthi
           </button>
-          <button className="sidebar-link" onClick={() => navigate("/")}>
-            <i className="bi bi-house"></i>
-            Home
-          </button>
+         
           <button className="sidebar-link" onClick={() => navigate("/user")}>
             <i className="bi bi-grid"></i>
             Dashboard
@@ -259,7 +263,7 @@ function GitaBot() {
         {/* Header */}
         <header className="chat-header">
           <div className="chat-header-left">
-            <div className="chat-header-icon">🙏</div>
+            <div className="chat-header-icon">✨</div>
             <div className="chat-header-info">
               <h2>Sarthi — सारथी</h2>
               <p>
@@ -278,13 +282,7 @@ function GitaBot() {
                 {sentimentInfo.label}
               </div>
             )}
-            <button
-              className="header-btn"
-              onClick={handleNewChat}
-              title="New Chat"
-            >
-              <i className="bi bi-arrow-clockwise"></i>
-            </button>
+            
           </div>
         </header>
 
@@ -292,7 +290,7 @@ function GitaBot() {
         <div className="chat-messages">
           {messages.length === 0 && !isLoading ? (
             <div className="welcome-screen">
-              <div className="welcome-icon">🙏</div>
+              <div className="welcome-icon">✨</div>
               <h2>
                 Namaste, welcome to <span>Sarthi</span>
               </h2>
@@ -319,10 +317,10 @@ function GitaBot() {
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`message-row ${msg.role}`}
+                  className={`message-row ${msg.role === "assistant" ? "assistant" : msg.role}`}
                 >
                   <div className="message-avatar">
-                    {msg.role === "bot" ? "🙏" : "👤"}
+                    {msg.role === "assistant" ? "✨" : "👤"}
                   </div>
                   <div className="message-content">
                     <div className="message-bubble">
@@ -363,7 +361,7 @@ function GitaBot() {
               {/* Typing Indicator */}
               {isLoading && (
                 <div className="typing-indicator">
-                  <div className="message-avatar">🙏</div>
+                  <div className="message-avatar">✨</div>
                   <div className="typing-bubble">
                     <div className="typing-dot"></div>
                     <div className="typing-dot"></div>
@@ -407,7 +405,7 @@ function GitaBot() {
               </button>
             </div>
           </div>
-          <p className="chat-input-hint">
+          <p className="chat-input-hint mb-0  ">
             Sarthi draws wisdom from the Bhagavad Gita • Press Enter to send,
             Shift+Enter for new line
           </p>

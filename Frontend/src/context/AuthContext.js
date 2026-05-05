@@ -70,6 +70,10 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("vidlearn_user_name");
+    localStorage.removeItem("vidlearn_user_email");
+    localStorage.removeItem("vidlearn_user_role");
+    localStorage.removeItem("activeNav");
     delete axios.defaults.headers.common["Authorization"];
   };
 

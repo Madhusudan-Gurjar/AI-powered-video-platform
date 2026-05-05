@@ -38,6 +38,11 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import AuthPage from "./pages/AuthPage";
 import Home from "./pages/Home";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// import Home from "./pages/Home";
+// import Login from "./pages/Login";
+// import Signup from "./pages/Signup";
+import AuthPage from "./pages/AuthPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -54,6 +59,26 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 
 function App() {
   return (
+    <Router>
+      <div className="app-container">
+        <Routes>
+          <Route path="/" element={<AuthPage />} />
+          {/* <Route path="/" element={<Signup />} /> */}
+          {/* <Route path="/login" element={<Login />} /> */}
+          {/* <Route path="/signup" element={<Signup />} /> */}
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/user" element={<UserDashboard />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/admin/my-uploads" element={<MyUploads />} />
+
+          {/*  NEW ROUTE added for video detail view */}
+          <Route path="/videos/:id" element={<VideoDetails />} />
+          
+          {/* Sarthi Chatbot Route */}
+          <Route path="/geeta-bot" element={<GitaBot />} />
+        </Routes>
+      </div>
+    </Router>
     <AuthProvider>
       <Router>
         <AppShell />

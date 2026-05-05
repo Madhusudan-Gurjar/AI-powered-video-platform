@@ -46,12 +46,34 @@ import MyUploads from "./pages/MyUploads";
 import VideoDetails from "./pages/VideoDetails";
 import { AuthProvider } from "./context/AuthContext";
 
+// NEW IMPORT for Sarthi Chatbot
+import GitaBot from "./pages/GitaBot";
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./styles/App.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 function App() {
   return (
+    <Router>
+      <div className="app-container">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/user" element={<UserDashboard />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/admin/my-uploads" element={<MyUploads />} />
+
+          {/*  NEW ROUTE added for video detail view */}
+          <Route path="/videos/:id" element={<VideoDetails />} />
+          
+          {/* Sarthi Chatbot Route */}
+          <Route path="/geeta-bot" element={<GitaBot />} />
+        </Routes>
+      </div>
+    </Router>
     <AuthProvider>
       <Router>
         <div className="app-container">

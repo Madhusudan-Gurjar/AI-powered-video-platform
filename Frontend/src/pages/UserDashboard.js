@@ -1,7 +1,3 @@
-
-
-// cjanges again
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -14,8 +10,12 @@ const UserDashboard = () => {
 
   useEffect(() => {
     const fetchVideos = async () => {
-      const res = await axios.get("http://localhost:5000/api/videos");
-      setVideos(res.data);
+      try {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/videos`);
+        setVideos(res.data);
+      } catch (err) {
+        console.error("Failed to fetch videos", err);
+      }
     };
     fetchVideos();
   }, []);
@@ -27,22 +27,24 @@ const UserDashboard = () => {
         <Link to="/" className="btn btn-danger">Logout</Link>
       </div>
       <div className="videos-grid">
-        {videos.map((video) => (
-          <div
-            key={video._id}
-            className="video-glass-container"
-            onClick={() => navigate(`/videos/${video._id}`)}
-          >
-            <video src={video.url} controls />
-            <p className="video-title">{video.title}</p>
-            <p className="video-date">{new Date(video.uploadedAt).toLocaleString()}</p>
-          </div>
-        ))}
+        {videos.length === 0 ? (
+          <p>No videos available.</p>
+        ) : (
+          videos.map((video) => (
+            <div
+              key={video._id}
+              className="video-glass-container"
+              onClick={() => navigate(`/videos/${video._id}`)}
+            >
+              <video src={video.url} controls />
+              <p className="video-title">{video.title}</p>
+              <p className="video-date">{new Date(video.uploadedAt).toLocaleString()}</p>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
 };
 
 export default UserDashboard;
-
-

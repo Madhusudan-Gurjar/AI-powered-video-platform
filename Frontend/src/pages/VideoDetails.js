@@ -1,8 +1,3 @@
-
-
-// // export default VideoDetails;
-//  translation changes
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -23,10 +18,12 @@ const VideoDetails = () => {
   const [transcription, setTranscription] = useState("");
   const [translation, setTranslation] = useState("");
 
+  const API_URL = process.env.REACT_APP_API_URL;
+
   useEffect(() => {
     const fetchVideo = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/videos/${id}`);
+        const res = await axios.get(`${API_URL}/api/videos/${id}`);
         setVideo(res.data);
         setTranscription(res.data.transcription || "");
       } catch (err) {
@@ -34,20 +31,18 @@ const VideoDetails = () => {
       }
     };
     fetchVideo();
-  }, [id]);
+  }, [id, API_URL]);
 
   const handleTabSwitch = async (tab) => {
     setActiveTab(tab);
 
     if (tab === "translation") {
-      setTranslation(""); // Clear before showing translated text
+      setTranslation("");
       try {
         const langCode = languageCodeMap[language] || "en";
-
-        const res = await axios.post(`http://localhost:5000/api/videos/${id}/translate`, {
+        const res = await axios.post(`${API_URL}/api/videos/${id}/translate`, {
           targetLanguage: langCode,
         });
-
         setTranslation(res.data.translatedText || "Translation not available");
       } catch (err) {
         console.error("Failed to translate transcription:", err);
@@ -58,7 +53,7 @@ const VideoDetails = () => {
 
   const handleLike = async () => {
     try {
-      const res = await axios.post(`http://localhost:5000/api/videos/${id}/like`);
+      const res = await axios.post(`${API_URL}/api/videos/${id}/like`);
       setVideo(res.data);
     } catch (err) {
       console.error("Like failed", err);
@@ -67,7 +62,7 @@ const VideoDetails = () => {
 
   const handleDislike = async () => {
     try {
-      const res = await axios.post(`http://localhost:5000/api/videos/${id}/dislike`);
+      const res = await axios.post(`${API_URL}/api/videos/${id}/dislike`);
       setVideo(res.data);
     } catch (err) {
       console.error("Dislike failed", err);
@@ -77,7 +72,7 @@ const VideoDetails = () => {
   const handleComment = async () => {
     if (!comment.trim()) return;
     try {
-      const res = await axios.post(`http://localhost:5000/api/videos/${id}/comment`, {
+      const res = await axios.post(`${API_URL}/api/videos/${id}/comment`, {
         text: comment,
       });
       setVideo(res.data);
@@ -95,7 +90,6 @@ const VideoDetails = () => {
         <h2>{video.title}</h2>
         <video src={video.url} controls className="w-100" />
 
-        {/* Language selector */}
         <div className="mt-3">
           <label htmlFor="language-select" className="form-label">
             Select Language:
@@ -112,7 +106,6 @@ const VideoDetails = () => {
           </select>
         </div>
 
-        {/* Tab switcher */}
         <div className="mt-4 d-flex gap-2">
           <button
             className={`btn ${activeTab === "transcription" ? "btn-primary" : "btn-outline-primary"}`}
@@ -128,7 +121,6 @@ const VideoDetails = () => {
           </button>
         </div>
 
-        {/* Shared textarea */}
         <div className="mt-3">
           <label htmlFor="text-area" className="form-label">
             {activeTab === "transcription" ? "Transcription" : "Translation"} 
@@ -147,7 +139,6 @@ const VideoDetails = () => {
           />
         </div>
 
-        {/* Likes and dislikes */}
         <div className="mt-3">
           <button className="btn btn-success me-2" onClick={handleLike}>
             👍 {video.likes || 0}
@@ -157,7 +148,6 @@ const VideoDetails = () => {
           </button>
         </div>
 
-        {/* Comments section */}
         <div className="mt-4">
           <h5>Comments</h5>
           <input

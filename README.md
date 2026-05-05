@@ -1,71 +1,89 @@
-# Getting Started with Create React App
+# AI‑powered Video Platform
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a MERN stack application designed to provide a multilingual video experience powered by **AssemblyAI**. The platform allows admins to manage video uploads and users to view videos with transcriptions and translations in multiple languages.
 
-## Available Scripts
+Currently, the project includes signup and login pages for both users and admins, though authentication logic is not yet implemented.
 
-In the project directory, you can run:
+## Current Functionality
+### Admin
+- Signup / Login (UI only, no authentication implemented yet)
+- Upload videos
+- View all uploaded videos in **My Uploads**
+- Delete uploaded videos
 
-### `npm start`
+### User
+- Signup / Login (UI only, no authentication implemented yet)
+- View available videos
+- Get transcription for any video
+- Get translation of the transcription in selected language (currently supports **English**, **Hindi**, and **Kannada**)
+- Like and dislike videos
+- Comment on videos
+- **Note:** Users cannot delete videos
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Transcription & Translation
+- Audio is extracted from uploaded videos
+- Transcription is generated using **AssemblyAI**
+- Translation is provided based on the selected language from the supported list
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Tech Stack
+- **Frontend:** React, CSS
+- **Backend:** Node.js, Express, MongoDB
+- **Storage:** Cloudinary for videos
+- **Transcription & Translation:** AssemblyAI
+- **Audio Processing:** FFmpeg## Installation & Setup
+## Installation & Setup
+### Clone the repository
+```bash
+git clone https://github.com/Madhusudan-Gurjar/AI-powered-video-platform.git
+cd AI-powered-video-platform
+```
 
-### `npm test`
+### Install backend dependencies
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+cd Backend
+npm install
+```
+### Install frontend dependencies
+```bash
+cd ../Frontend
+npm install
+```
 
-### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Running the Project
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Start backend
+```bash
+cd Backend
+npm start
+```
+### Start frontend
+```bash
+cd ../Frontend
+npm start
+```
 
-### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Transcription Workflow
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Admin uploads a video.
+2. Backend extracts audio using FFmpeg.
+3. `transcribe.py` sends audio to AssemblyAI.
+4. Transcript and translation are stored and served to the frontend.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+##Future Enhancements
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- Implement text-to-speech functionality to generate videos in any selected language.
 
-## Learn More
+- Support storage and playback for both raw uploaded videos and converted language videos.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- Add role-based authentication for students/users, teachers, and admins.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- Enhance UI for improved navigation and user experience.
 
-### Code Splitting
+- Enable processing of long-duration videos for transcription, translation, and conversion.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- Optimize backend performance and scalability for handling large video files efficiently.
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-# AI-powered-video-platform

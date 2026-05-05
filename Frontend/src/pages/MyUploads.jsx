@@ -1,8 +1,3 @@
-
-
-
-// My Changes 
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "../styles/MyUploads.css";
@@ -13,7 +8,7 @@ const MyUploads = () => {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/videos");
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/videos`);
         setVideos(res.data);
       } catch (err) {
         console.error("Failed to fetch videos", err);
@@ -23,24 +18,15 @@ const MyUploads = () => {
     fetchVideos();
   }, []);
 
-  // const handleDelete = async (videoId) => {
-  //   try {
-  //     await axios.delete(`http://localhost:5000/api/videos/${videoId}`);
-  //     setVideos((prev) => prev.filter((video) => video._id !== videoId));
-  //   } catch (err) {
-  //     console.error("Failed to delete video", err);
-  //   }
-  // };
   const handleDelete = async (videoId) => {
-  console.log("Attempting to delete video ID:", videoId); //  add this
-  try {
-    await axios.delete(`http://localhost:5000/api/videos/${videoId}`);
-    setVideos((prev) => prev.filter((video) => video._id !== videoId));
-  } catch (err) {
-    console.error("Failed to delete video", err);
-  }
-};
-
+    console.log("Attempting to delete video ID:", videoId);
+    try {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/videos/${videoId}`);
+      setVideos((prev) => prev.filter((video) => video._id !== videoId));
+    } catch (err) {
+      console.error("Failed to delete video", err);
+    }
+  };
 
   return (
     <div className="my-uploads-page">

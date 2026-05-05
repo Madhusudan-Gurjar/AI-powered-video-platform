@@ -279,3 +279,218 @@ h2 {
     width: 100%;
   }
 }
+
+/* ═══════════════════════════════════════════
+   VidLearn — Login Page
+═══════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.vl-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0d0f1a;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  padding: 1.5rem;
+}
+
+.vl-login-card {
+  background: #13151f;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 2rem 2rem 1.6rem;
+  width: 100%;
+  max-width: 400px;
+  animation: fadeInUp 0.5s ease;
+}
+
+/* Logo */
+.vl-login-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+.vl-login-logo-icon {
+  width: 38px;
+  height: 38px;
+  background: #f5c518;
+  color: #000;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.vl-login-logo-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  line-height: 1.2;
+}
+.vl-login-logo-sub {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #f5c518;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+/* Powered by badge */
+.vl-powered-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245,197,24,0.1);
+  border: 1px solid rgba(245,197,24,0.25);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  color: #f5c518;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+}
+.vl-powered-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f5c518;
+  flex-shrink: 0;
+}
+
+/* Heading */
+.vl-login-heading {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.vl-login-sub {
+  font-size: 0.82rem;
+  color: #7b7f96;
+  margin-bottom: 1.3rem;
+}
+
+/* Sign in / Sign up tabs */
+.vl-auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #1e2030;
+  border-radius: 10px;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 1.3rem;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.vl-auth-tab {
+  padding: 0.5rem;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: #7b7f96;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+.vl-auth-tab.active {
+  background: #1a1d2e;
+  color: #fff;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.4);
+}
+
+/* Role grid */
+.vl-role-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 1.3rem;
+}
+.vl-role-card {
+  background: #1e2030;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 0.75rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+}
+.vl-role-card:hover { background: #252840; }
+.vl-role-card.selected {
+  border-color: #f5c518;
+  background: rgba(245,197,24,0.08);
+}
+.vl-role-icon { font-size: 1.3rem; }
+.vl-role-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #c8c8de;
+}
+.vl-role-card.selected .vl-role-label { color: #f5c518; }
+
+/* Form */
+.vl-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.vl-field-label {
+  font-size: 0.78rem;
+  color: #9ca0b8;
+  margin-bottom: 5px;
+  margin-top: 0.9rem;
+}
+.vl-field {
+  width: 100%;
+  background: #1e2030;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 0.65rem 0.9rem;
+  color: #e0e0f0;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.18s;
+}
+.vl-field::placeholder { color: #4a4e66; }
+.vl-field:focus { border-color: rgba(255,255,255,0.25); }
+
+.vl-submit-btn {
+  margin-top: 1.3rem;
+  width: 100%;
+  padding: 0.72rem;
+  border-radius: 10px;
+  border: none;
+  background: #fff;
+  color: #0d0f1a;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.vl-submit-btn:hover { background: #e8e8ff; transform: translateY(-1px); }
+.vl-submit-btn:active { transform: translateY(0); }
+
+/* Footer */
+.vl-login-footer {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #7b7f96;
+  margin-top: 1rem;
+}
+.vl-link-btn {
+  background: none;
+  border: none;
+  color: #f5c518;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+.vl-link-btn:hover { text-decoration: underline; }

@@ -2,6 +2,8 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import videoRoutes from "./routes/videoRoutes.js";
+import geetaBotRoutes from "./routes/geetaBotRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import dotenv from "dotenv";
 
 dotenv.config(); // Load environment variables from .env file
@@ -23,15 +25,15 @@ mongoose.connect(process.env.MONGO_URI, {
   console.error("❌ MongoDB connection error:", err);
 });
 
+// Routes
 // // Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/videos", videoRoutes);
+app.use("/api/geeta-bot", geetaBotRoutes);
 
-// // Start server
+// Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
 

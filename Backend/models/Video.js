@@ -52,21 +52,35 @@ import mongoose from "mongoose";
 
 const commentSchema = new mongoose.Schema({
   text: String,
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  userName: String,
   createdAt: {
     type: Date,
     default: Date.now,
   },
-});
+}, { _id: false });
 
 const videoSchema = new mongoose.Schema({
   url: String,
   title: String,
   transcription: String,
-  likes: { type: Number, default: 0 },
-  dislikes: { type: Number, default: 0 },
-  comments: [{ text: String }],
+  uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  uploader: { type: String, default: "Unknown" },
+  likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  dislikedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  comments: [commentSchema],
   uploadedAt: { type: Date, default: Date.now },
 });
+
+videoSchema.virtual("likes").get(function() {
+  return this.likedBy ? this.likedBy.length : 0;
+});
+
+videoSchema.virtual("dislikes").get(function() {
+  return this.dislikedBy ? this.dislikedBy.length : 0;
+});
+
+videoSchema.set("toJSON", { virtuals: true });
 
 
 const Video = mongoose.model("Video", videoSchema);

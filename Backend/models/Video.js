@@ -64,6 +64,7 @@ const videoSchema = new mongoose.Schema({
   url: String,
   title: String,
   transcription: String,
+  thumbnailUrl: String,
   uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   uploader: { type: String, default: "Unknown" },
   likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],

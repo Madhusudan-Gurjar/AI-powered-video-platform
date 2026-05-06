@@ -163,6 +163,7 @@ function AppShell() {
         <Route path="/home" element={<Home />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/user" element={<UserDashboard />} />
+        <Route path="/dashboard" element={<UserDashboard />} />
 
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/admin/my-uploads" element={<MyUploads />} />

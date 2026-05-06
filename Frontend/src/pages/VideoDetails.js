@@ -212,11 +212,20 @@ const VideoDetails = () => {
   if (!video) return <p className="text-white text-center">Loading...</p>;
 
   const handleGoBack = () => {
-    if (location.state?.from === 'liked') {
-      navigate('/dashboard', { state: { activeNav: 'Liked Videos' } });
-    } else {
-      navigate(-1);
+    const fromPath = location.state?.fromPath;
+    const returnState = location.state?.returnState;
+
+    if (fromPath) {
+      navigate(fromPath, { state: returnState, replace: true });
+      return;
     }
+
+    if (location.state?.from === "liked") {
+      navigate("/user", { state: { activeNav: "Liked Videos" }, replace: true });
+      return;
+    }
+
+    navigate(-1);
   };
 
   return (

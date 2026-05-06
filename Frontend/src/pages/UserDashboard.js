@@ -125,6 +125,17 @@ const UserDashboard = () => {
           headers: { Authorization: `Bearer ${fetchToken}` },
         });
         setUserStats(res.data);
+        if (Array.isArray(res.data.watchProgress)) {
+          const dbProgress = res.data.watchProgress.reduce((acc, item) => {
+            if (!item?.videoId) return acc;
+            acc[item.videoId.toString()] = {
+              percent: Math.round(item.percent || 0),
+              watchedAt: item.watchedAt || new Date().toISOString(),
+            };
+            return acc;
+          }, {});
+          setProgress(dbProgress);
+        }
       } catch (err) {
         console.error("Failed to fetch user stats", err);
       }
@@ -256,18 +267,14 @@ const UserDashboard = () => {
   }, [storageKey, likedStorageKey]);
 
   /* ── derived stats ── */
-  const totalWatched    = Object.keys(progress).length;
+  const totalWatched    = userRole === "Student" ? (userStats?.watchProgressCount ?? Object.keys(progress).length) : Object.keys(progress).length;
   const totalLiked      = userRole === "Student" ? (userStats?.likedVideosCount ?? liked.length) : liked.length;
   const totalComments   = userRole === "Student" ? (userStats?.commentsCount ?? 0) : videos.reduce((acc, v) => acc + (v.comments?.length || 0), 0);
-  const profileWatchedCount = userRole === "Student"
-    ? totalWatched
-    : totalWatched;
+  const profileWatchedCount = totalWatched;
   const profileLikedCount = userRole === "Student"
     ? totalLiked
     : liked.length;
-  const profileCommentsCount = userRole === "Student"
-    ? totalComments
-    : totalComments;
+  const profileCommentsCount = totalComments;
 
   /* ── teacher-specific stats ── */
   const totalUploaded = teacherVideos.length;

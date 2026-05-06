@@ -260,13 +260,13 @@ const UserDashboard = () => {
   const totalLiked      = userRole === "Student" ? (userStats?.likedVideosCount ?? liked.length) : liked.length;
   const totalComments   = userRole === "Student" ? (userStats?.commentsCount ?? 0) : videos.reduce((acc, v) => acc + (v.comments?.length || 0), 0);
   const profileWatchedCount = userRole === "Student"
-    ? (user?.watchProgressCount ?? totalWatched)
+    ? totalWatched
     : totalWatched;
   const profileLikedCount = userRole === "Student"
-    ? (user?.likedVideosCount ?? userStats?.likedVideosCount ?? liked.length)
+    ? totalLiked
     : liked.length;
   const profileCommentsCount = userRole === "Student"
-    ? (userStats?.commentsCount ?? totalComments)
+    ? totalComments
     : totalComments;
 
   /* ── teacher-specific stats ── */

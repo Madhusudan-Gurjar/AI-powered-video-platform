@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import "../styles/UserDashboard.css";
+import SharedVideoCard from "../components/VideoCard";
 
 /* ─── helpers ─────────────────────────────────────────────── */
 const getHour = () => new Date().getHours();
@@ -213,7 +214,13 @@ const UserDashboard = () => {
       const fetchToken = token || localStorage.getItem("token");
       const saveResponse = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/videos`,
-        { url: data.secure_url, title: videoTitle },
+        {
+          url: data.secure_url,
+          title: videoTitle,
+          thumbnailUrl: data.secure_url
+            .replace("/video/upload/", "/video/upload/so_1.0,w_640,h_360,c_fill,g_auto,f_jpg/")
+            .replace(/\.(mp4|mov|webm|mkv|avi)$/i, ".jpg"),
+        },
         { headers: { Authorization: `Bearer ${fetchToken}` } }
       );
 
@@ -463,37 +470,20 @@ const UserDashboard = () => {
                 {videos.filter(v => v.title.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
                   <p className="vl-placeholder">No videos match your search.</p>
                 ) : (
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "15px" }}>
+                  <div className="video-grid">
                     {videos.filter(v => v.title.toLowerCase().includes(searchQuery.toLowerCase())).map((v) => (
-                      <div
+                      <SharedVideoCard
                         key={v._id}
-                        style={{
-                          background: "#1e293b",
-                          borderRadius: "8px",
-                          overflow: "hidden",
-                          cursor: "pointer",
-                          transition: "transform 0.2s",
-                        }}
-                        onClick={() => navigate(`/videos/${v._id}`)}
-                        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-                        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                      >
-                        <div style={{ aspectRatio: "16/9", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px" }}>
-                          <span style={{ fontSize: "28px" }}>▶️</span>
-                        </div>
-                        <div style={{ padding: "12px" }}>
-                          <p style={{ margin: "0 0 4px 0", fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontSize: "14px" }}>
-                            {v.title}
-                          </p>
-                          <p style={{ margin: "0 0 4px 0", fontSize: "12px", color: "#94a3b8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                            By {v.uploader}
-                          </p>
-                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#94a3b8" }}>
-                            <span>👍 {v.likes || 0}</span>
-                            <span>💬 {v.comments?.length || 0}</span>
-                          </div>
-                        </div>
-                      </div>
+                        video={v}
+                        onClick={() =>
+                          navigate(`/videos/${v._id}`, {
+                            state: {
+                              fromPath: location.pathname,
+                              returnState: { activeNav },
+                            },
+                          })
+                        }
+                      />
                     ))}
                   </div>
                 )}
@@ -547,7 +537,14 @@ const UserDashboard = () => {
                   key={v._id}
                   video={v}
                   progressPct={progress[v._id]?.percent || 0}
-                  onClick={() => navigate(`/videos/${v._id}`)}
+                  onClick={() =>
+                    navigate(`/videos/${v._id}`, {
+                      state: {
+                        fromPath: location.pathname,
+                        returnState: { activeNav },
+                      },
+                    })
+                  }
                 />
               ))
             )}
@@ -560,7 +557,14 @@ const UserDashboard = () => {
                     key={v._id}
                     video={v}
                     progressPct={0}
-                    onClick={() => navigate(`/videos/${v._id}`)}
+                    onClick={() =>
+                      navigate(`/videos/${v._id}`, {
+                        state: {
+                          fromPath: location.pathname,
+                          returnState: { activeNav },
+                        },
+                      })
+                    }
                   />
                 ))}
               </div>
@@ -694,34 +698,20 @@ const UserDashboard = () => {
                 {teacherVideos.filter(v => v.title.toLowerCase().includes(teacherSearchQuery.toLowerCase())).length === 0 ? (
                   <p className="vl-placeholder">No videos match your search.</p>
                 ) : (
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "15px" }}>
+                  <div className="video-grid">
                     {teacherVideos.filter(v => v.title.toLowerCase().includes(teacherSearchQuery.toLowerCase())).map((v) => (
-                      <div
+                      <SharedVideoCard
                         key={v._id}
-                        style={{
-                          background: "#1e293b",
-                          borderRadius: "8px",
-                          overflow: "hidden",
-                          cursor: "pointer",
-                          transition: "transform 0.2s",
-                        }}
-                        onClick={() => navigate(`/videos/${v._id}`)}
-                        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-                        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                      >
-                        <div style={{ aspectRatio: "16/9", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px" }}>
-                          <span style={{ fontSize: "28px" }}>▶️</span>
-                        </div>
-                        <div style={{ padding: "12px" }}>
-                          <p style={{ margin: "0 0 4px 0", fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontSize: "14px" }}>
-                            {v.title}
-                          </p>
-                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#94a3b8" }}>
-                            <span>👍 {v.likes || 0}</span>
-                            <span>💬 {v.comments?.length || 0}</span>
-                          </div>
-                        </div>
-                      </div>
+                        video={v}
+                        onClick={() =>
+                          navigate(`/videos/${v._id}`, {
+                            state: {
+                              fromPath: location.pathname,
+                              returnState: { activeNav },
+                            },
+                          })
+                        }
+                      />
                     ))}
                   </div>
                 )}
@@ -736,37 +726,20 @@ const UserDashboard = () => {
             ) : likedVideos.length === 0 ? (
               <p className="vl-placeholder">You haven't liked any videos yet.</p>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(165px, 1fr))", gap: "14px" }}>
+              <div className="video-grid">
                 {likedVideos.map((v) => (
-                  <div
+                  <SharedVideoCard
                     key={v._id}
-                    style={{
-                      background: "#1e293b",
-                      borderRadius: "10px",
-                      overflow: "hidden",
-                      cursor: "pointer",
-                      transition: "transform 0.2s",
-                    }}
-                    onClick={() => navigate(`/videos/${v._id}`, { state: { from: 'liked' } })}
-                    onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                  >
-                    <div style={{ aspectRatio: "16/9", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "32px" }}>
-                      <span style={{ fontSize: "20px" }}>▶️</span>
-                    </div>
-                    <div style={{ padding: "10px" }}>
-                      <p style={{ margin: "0 0 4px 0", fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontSize: "13px" }}>
-                        {v.title}
-                      </p>
-                      <p style={{ margin: "0 0 6px 0", fontSize: "11px", color: "#94a3b8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        By {v.uploader}
-                      </p>
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#94a3b8" }}>
-                        <span>👍 {v.likes || 0}</span>
-                        <span>💬 {v.comments?.length || 0}</span>
-                      </div>
-                    </div>
-                  </div>
+                    video={v}
+                    onClick={() =>
+                      navigate(`/videos/${v._id}`, {
+                        state: {
+                          fromPath: location.pathname,
+                          returnState: { activeNav: "Liked Videos" },
+                        },
+                      })
+                    }
+                  />
                 ))}
               </div>
             )}
@@ -1060,6 +1033,51 @@ const TeacherChart = ({ teacherVideos }) => {
           </text>
         </g>
       </svg>
+    </div>
+  );
+};
+
+const VideoCard = ({ video, onClick, showUploader = true, onDelete }) => {
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onClick?.();
+    }
+  };
+
+  return (
+    <div
+      className="video-card video-card--interactive"
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={handleKeyDown}
+    >
+      <div className="video-card__thumb">
+        <span className="video-card__play">▶</span>
+      </div>
+      <div className="video-card__body">
+        <p className="video-card__title">{video.title || "Untitled"}</p>
+        {showUploader && (
+          <p className="video-card__meta">By {video.uploader || "Unknown"}</p>
+        )}
+        <div className="video-card__stats">
+          <span className="video-card__stat">👍 {video.likes || 0}</span>
+          <span className="video-card__stat">💬 {video.comments?.length || 0}</span>
+        </div>
+        {onDelete && (
+          <button
+            type="button"
+            className="btn btn-sm btn-danger video-card__action"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(video._id);
+            }}
+          >
+            🗑 Delete
+          </button>
+        )}
+      </div>
     </div>
   );
 };

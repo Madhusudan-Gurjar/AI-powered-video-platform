@@ -166,6 +166,9 @@ const AdminDashboard = () => {
         body: JSON.stringify({
           url: data.secure_url,
           title: videoTitle,
+          thumbnailUrl: data.secure_url
+            .replace("/video/upload/", "/video/upload/so_1.0,w_640,h_360,c_fill,g_auto,f_jpg/")
+            .replace(/\.(mp4|mov|webm|mkv|avi)$/i, ".jpg"),
         }),
       });
 

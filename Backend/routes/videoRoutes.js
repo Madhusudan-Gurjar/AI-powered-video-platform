@@ -103,7 +103,7 @@ router.get("/:id", async (req, res) => {
 
 // Upload video only (no transcription)
 router.post("/", protect, async (req, res) => {
-  const { url, title } = req.body;
+  const { url, title, thumbnailUrl } = req.body;
 
   if (!url) {
     console.log(" No URL received");
@@ -115,6 +115,7 @@ router.post("/", protect, async (req, res) => {
     const newVideo = new Video({ 
       url, 
       title,
+      thumbnailUrl,
       uploadedBy: req.user.id,
       uploader: req.user.name
     });

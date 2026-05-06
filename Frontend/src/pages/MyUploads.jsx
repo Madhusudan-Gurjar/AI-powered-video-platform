@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import SharedVideoCard from "../components/VideoCard";
 import "../styles/MyUploads.css";
 
 const MyUploads = () => {
@@ -30,22 +31,18 @@ const MyUploads = () => {
 
   return (
     <div className="my-uploads-page">
-      <h2 className="uploads-title">📹 My Uploaded Videos</h2>
-      <div className="videos-grid">
+      <h2 className="uploads-title">My Uploaded Videos</h2>
+      <div className="video-grid">
         {videos.length === 0 ? (
-          <p>No videos uploaded yet.</p>
+          <p className="uploads-empty">No videos uploaded yet.</p>
         ) : (
           videos.map((video) => (
-            <div key={video._id} className="video-card">
-              <video src={video.url} controls width="100%" />
-              <p className="video-title">{video.title || "Untitled Video"}</p>
-              <button
-                className="delete-button"
-                onClick={() => handleDelete(video._id)}
-              >
-                🗑️ Delete
-              </button>
-            </div>
+            <SharedVideoCard
+              key={video._id}
+              video={video}
+              showUploader={false}
+              onDelete={handleDelete}
+            />
           ))
         )}
       </div>

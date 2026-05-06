@@ -2,6 +2,7 @@
 // changes rishabh
 import express from 'express';
 import Video from '../models/Video.js';
+import User from '../models/User.js';
 import { transcribeAudioFromVideo } from '../utils/transcriber.js';
 import { protect } from '../middleware/auth.js';
 import { translate } from '@vitalets/google-translate-api';
@@ -45,7 +46,7 @@ router.get("/user/uploaded", protect, async (req, res) => {
 router.get("/user/stats", protect, async (req, res) => {
   try {
     const userId = req.user.id;
-    const likedVideos = await Video.find({ likedBy: userId });
+    const user = await User.findById(userId).select("watchProgress likedVideos");
     const allVideos = await Video.find();
     
     // Count comments by this user
@@ -57,13 +58,62 @@ router.get("/user/stats", protect, async (req, res) => {
     });
 
     res.json({
-      likedVideosCount: likedVideos.length,
+      likedVideosCount: user?.likedVideos?.length || 0,
+      watchProgressCount: user?.watchProgress?.filter((item) => (item.percent || 0) > 0).length || 0,
+      watchProgress: user?.watchProgress || [],
       commentsCount: commentsCount,
       videosAvailable: allVideos.length,
     });
   } catch (err) {
     console.error("Failed to fetch user stats:", err);
     res.status(500).json({ error: "Failed to fetch user stats" });
+  }
+});
+
+// Save watch progress for logged-in user
+router.post("/user/progress", protect, async (req, res) => {
+  try {
+    const { videoId, percent } = req.body;
+    const parsedPercent = Number(percent);
+
+    if (!videoId) {
+      return res.status(400).json({ error: "Video ID is required" });
+    }
+
+    if (Number.isNaN(parsedPercent) || parsedPercent < 0) {
+      return res.status(400).json({ error: "Valid progress percent is required" });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const existingIndex = user.watchProgress.findIndex(
+      (item) => item.videoId?.toString() === videoId.toString()
+    );
+
+    const progressRecord = {
+      videoId,
+      percent: Math.min(Math.round(parsedPercent), 100),
+      watchedAt: new Date(),
+    };
+
+    if (existingIndex >= 0) {
+      user.watchProgress[existingIndex] = progressRecord;
+    } else {
+      user.watchProgress.push(progressRecord);
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      progress: progressRecord,
+    });
+  } catch (err) {
+    console.error("Failed to save watch progress:", err);
+    res.status(500).json({ error: "Failed to save watch progress" });
   }
 });
 

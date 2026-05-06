@@ -71,6 +71,7 @@ const VideoDetails = () => {
   const [isDisliked, setIsDisliked] = useState(false);
 
   const videoRef = useRef(null);
+  const lastSyncedBucketRef = useRef(-1);
   const API_URL = process.env.REACT_APP_API_URL;
 
   /* restore liked state */
@@ -85,12 +86,36 @@ const VideoDetails = () => {
     if (!el || !el.duration) return;
     const pct = (el.currentTime / el.duration) * 100;
     saveProgress(progressStorageKey, id, pct);
-  }, [id, progressStorageKey]);
+
+    if (token && user) {
+      const currentBucket = Math.floor(pct / 10);
+      if (currentBucket !== lastSyncedBucketRef.current && pct > 0) {
+        lastSyncedBucketRef.current = currentBucket;
+        axios.post(
+          `${API_URL}/api/videos/user/progress`,
+          { videoId: id, percent: pct },
+          { headers: { Authorization: `Bearer ${token}` } }
+        ).catch((err) => {
+          console.error("Failed to sync watch progress:", err);
+        });
+      }
+    }
+  }, [API_URL, id, progressStorageKey, token, user]);
 
   /* mark as 100% when ended */
   const handleEnded = useCallback(() => {
     saveProgress(progressStorageKey, id, 100);
-  }, [id, progressStorageKey]);
+    if (token && user) {
+      lastSyncedBucketRef.current = 10;
+      axios.post(
+        `${API_URL}/api/videos/user/progress`,
+        { videoId: id, percent: 100 },
+        { headers: { Authorization: `Bearer ${token}` } }
+      ).catch((err) => {
+        console.error("Failed to sync final watch progress:", err);
+      });
+    }
+  }, [API_URL, id, progressStorageKey, token, user]);
 
   /* restore playback position */
   const handleLoadedMetadata = useCallback(() => {

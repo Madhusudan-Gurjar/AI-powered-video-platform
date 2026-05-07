@@ -24,8 +24,17 @@ const AuthPage = () => {
         // LOGIN
         const res = await login(email, password);
         const user = res.user;
-
-        navigate(user.role === "Admin" ? "/admin" : "/user");
+        
+        console.log("✅ Login successful - User:", user);
+        console.log("🔍 User role from response:", user?.role);
+        
+        if (user?.role === "Admin") {
+          console.log("➡️ Navigating to /admin");
+          navigate("/admin");
+        } else {
+          console.log("➡️ Navigating to /user (role: " + user?.role + ")");
+          navigate("/user");
+        }
 
       } else {
         // SIGNUP
@@ -36,10 +45,20 @@ const AuthPage = () => {
 
         const res = await register(name, email, password, role);
         const user = res.user;
-
-        navigate(user.role === "Admin" ? "/admin" : "/user");
+        
+        console.log("✅ Registration successful - User:", user);
+        console.log("🔍 User role from response:", user?.role);
+        
+        if (user?.role === "Admin") {
+          console.log("➡️ Navigating to /admin");
+          navigate("/admin");
+        } else {
+          console.log("➡️ Navigating to /user (role: " + user?.role + ")");
+          navigate("/user");
+        }
       }
     } catch (err) {
+      console.error("❌ Auth error:", err);
       alert(err.message);
     }
   };

@@ -36,11 +36,14 @@ router.post("/register", async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    console.log("✅ Registration successful - User role:", user.role, "Email:", email);
+
     res.status(201).json({
       token,
       user: buildUserResponse(user),
     });
   } catch (err) {
+    console.error("❌ Registration error:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -70,11 +73,14 @@ router.post("/login", async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    console.log("✅ Login successful - User role:", user.role, "Email:", email);
+    
     res.json({
       token,
       user: buildUserResponse(user),
     });
   } catch (err) {
+    console.error("❌ Login error:", err);
     res.status(500).json({ error: err.message });
   }
 });

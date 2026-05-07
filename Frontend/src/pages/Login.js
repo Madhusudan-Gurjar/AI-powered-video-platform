@@ -24,13 +24,27 @@ const Login = () => {
     setError("");
 
     try {
+      let response;
       if (activeTab === "signin") {
-        await login(email, password);
+        response = await login(email, password);
       } else {
-        await register(name, email, password, selectedRole);
+        response = await register(name, email, password, selectedRole);
       }
-      navigate(selectedRole === "Admin" ? "/admin" : "/user");
+      
+      // Use actual user role from response, not local selectedRole state
+      const userRole = response.user?.role;
+      console.log("✅ Auth successful - User:", response.user);
+      console.log("🔍 User role from response:", userRole);
+      
+      if (userRole === "Admin") {
+        console.log("➡️ Navigating to /admin");
+        navigate("/admin");
+      } else {
+        console.log("➡️ Navigating to /user (role: " + userRole + ")");
+        navigate("/user");
+      }
     } catch (err) {
+      console.error("❌ Auth error:", err);
       setError(err.message);
     }
   };

@@ -110,7 +110,7 @@
 // };
 
 // export default AdminDashboard;
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -121,13 +121,31 @@ const AdminDashboard = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadUrl, setUploadUrl] = useState("");
   const [videoTitle, setVideoTitle] = useState("");
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const { user, token, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  if (!user) {
-    navigate("/login");
-    return null;
-  }
+  // Role-based access control: Only Admin can access this page
+  useEffect(() => {
+    console.log("👤 AdminDashboard - Current user:", user);
+    
+    if (!user) {
+      console.log("❌ No user found, redirecting to login");
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    console.log("🔍 User role:", user.role);
+    
+    if (user.role !== "Admin") {
+      console.log("⛔ User is not Admin (role: " + user.role + "), redirecting to /user");
+      navigate("/user", { replace: true });
+      return;
+    }
+    
+    console.log("✅ Admin access granted");
+    setIsAuthorized(true);
+  }, [user, navigate]);
 
   const handleFileChange = (e) => {
     setVideoFile(e.target.files[0]);
@@ -189,6 +207,11 @@ const AdminDashboard = () => {
     logout();
     navigate("/login");
   };
+
+  // Prevent rendering if not authorized (redirect is in progress)
+  if (!isAuthorized) {
+    return null;
+  }
 
   return (
     <div className="admin-dashboard">
